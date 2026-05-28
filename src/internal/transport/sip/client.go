@@ -6,39 +6,25 @@ import (
 	"github.com/emiago/sipgo"
 )
 
-type Options struct {
-	ServerHost    string
-	ServerPort    int
-	From          string
-	To            string
-	Username      string
-	Password      string
-	Realm         string
-	Expire        int
-	UserAgentName string
-}
-
 type Client struct {
-	log  *slog.Logger
-	opts Options
-
+	log    *slog.Logger
 	ua     *sipgo.UserAgent
 	client *sipgo.Client
 }
 
 func NewClient(
 	log *slog.Logger,
-	opts Options,
-
+	userAgent string,
 ) (*Client, error) {
+
 	ua, err := sipgo.NewUA(
-		sipgo.WithUserAgent(opts.UserAgentName),
+		sipgo.WithUserAgent(userAgent),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	uaClient, err := sipgo.NewClient(
+	client, err := sipgo.NewClient(
 		ua,
 		sipgo.WithClientLogger(log),
 	)
@@ -48,8 +34,7 @@ func NewClient(
 
 	return &Client{
 		log:    log,
-		opts:   opts,
 		ua:     ua,
-		client: uaClient,
+		client: client,
 	}, nil
 }

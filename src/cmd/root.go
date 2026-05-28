@@ -7,17 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	logLevel string
-)
+var logLevel string
 
 var rootCmd = &cobra.Command{
 	Use:     appinfo.Service,
 	Version: appinfo.Version,
-	CompletionOptions: cobra.CompletionOptions{
-		DisableDefaultCmd: true,
-		// DisableNoDescFlag: true,
-	},
+	Short:   "SIPC/v2. SIP CLI client",
 }
 
 func Execute() {
@@ -27,8 +22,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().SortFlags = false
-	rootCmd.PersistentFlags().SortFlags = false
 	rootCmd.PersistentFlags().StringVar(
 		&logLevel,
 		"log-level",
