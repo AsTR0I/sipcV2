@@ -2,30 +2,35 @@ package app
 
 import (
 	"context"
-	"log/slog"
 
-	"github.com/AsTR0I/sipcV2/internal/infra/config"
-	"github.com/AsTR0I/sipcV2/internal/transport/sip"
+	"github.com/AsTR0I/sipcV2/internal/domain"
 )
 
-type App struct {
-	sip *sip.Client
-	log *slog.Logger
+type SIPClient interface {
+	Register(ctx context.Context, req domain.RegisterRequest) error
+	Options(ctx context.Context, req domain.OptionsRequest) error
 }
 
-func NewApp(
-	log *slog.Logger,
-	sipClient *sip.Client,
-) *App {
+type App struct {
+	sip SIPClient
+}
+
+func NewApp(sipClient SIPClient) *App {
 	return &App{
 		sip: sipClient,
-		log: log,
 	}
 }
 
-func (app *App) Options(
+func (a *App) Register(
 	ctx context.Context,
-	cfg config.SIPConfig,
+	req domain.RegisterRequest,
 ) error {
-	return app.sip.Options(ctx, cfg)
+	return a.sip.Register(ctx, req)
+}
+
+func (a *App) Options(
+	ctx context.Context,
+	req domain.OptionsRequest,
+) error {
+	return a.sip.Options(ctx, req)
 }

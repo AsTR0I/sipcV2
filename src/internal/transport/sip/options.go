@@ -6,14 +6,14 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/AsTR0I/sipcV2/internal/infra/config"
+	"github.com/AsTR0I/sipcV2/internal/domain"
 	"github.com/emiago/sipgo/sip"
 	"github.com/google/uuid"
 )
 
 func (c *Client) Options(
 	ctx context.Context,
-	cfg config.SIPConfig,
+	cfg domain.OptionsRequest,
 ) error {
 	host := cfg.ServerHost
 	port := "5060"
@@ -108,10 +108,14 @@ func (c *Client) Options(
 	eventHeader := sip.NewHeader("Event", "keep-alive")
 	req.AppendHeader(eventHeader)
 
+	fmt.Println(DumpRequest(req, req.Laddr.String(), req.Destination()))
+
 	res, err := c.client.Do(ctx, req)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(DumpResponse(res, req.Destination(), req.Laddr.String()))
 
 	c.log.Info(
 		"SIP OPTIONS completed",

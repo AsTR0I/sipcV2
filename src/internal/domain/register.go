@@ -1,6 +1,6 @@
-package config
+package domain
 
-type SIPConfig struct {
+type RegisterRequest struct {
 	UserPort   string
 	ServerHost string
 	Proxy      string
@@ -8,11 +8,11 @@ type SIPConfig struct {
 	From string
 	To   string
 
+	Realm    string
 	Username string
 	Password string
-	Realm    string
 
-	Expire int
+	Expires int
 
 	UserAgent string
 }

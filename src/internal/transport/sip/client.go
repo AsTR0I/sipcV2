@@ -1,14 +1,12 @@
 package sip
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"net"
-	"strconv"
 
-	"github.com/AsTR0I/sipcV2/internal/infra/config"
 	"github.com/emiago/sipgo"
+	"github.com/emiago/sipgo/sip"
 )
 
 type Client struct {
@@ -21,11 +19,11 @@ type Client struct {
 
 func NewClient(
 	log *slog.Logger,
-	cfg config.SIPConfig,
+	userAgent string,
 ) (*Client, error) {
 
 	ua, err := sipgo.NewUA(
-		sipgo.WithUserAgent(cfg.UserAgent),
+		sipgo.WithUserAgent(userAgent),
 	)
 	if err != nil {
 		return nil, err
@@ -45,30 +43,15 @@ func NewClient(
 		client: client,
 	}
 
-	if cfg.UserPort != "" {
-		intUserPort, err := strconv.Atoi(cfg.UserPort)
-		if err != nil {
-			return nil, err
-		}
-		if intUserPort < 1 || intUserPort > 65535 {
-			return nil, errors.New("user-port cant not be < 1 or > 65535")
-		}
+	return c, nil
+}
 
-		addr := fmt.Sprintf("0.0.0.0:%s", cfg.UserPort)
-
-		conn, err := net.ListenPacket("udp", addr)
-		if err != nil {
-			return nil, err
-		}
-
-		c.localUDP = conn
-
-		go func() {
-			if err := ua.TransportLayer().ServeUDP(conn); err != nil {
-				log.Error("udp transport stopped", slog.Any("err", err))
-			}
-		}()
+func (c *Client) dump(req *sip.Request, res *sip.Response) {
+	if req != nil {
+		fmt.Println(DumpRequest(req, req.Destination(), req.Laddr.String()))
 	}
 
-	return c, nil
+	if res != nil {
+		fmt.Println(DumpResponse(res, req.Destination(), req.Laddr.String()))
+	}
 }

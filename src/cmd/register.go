@@ -16,38 +16,63 @@ import (
 )
 
 func init() {
-	optionsCmd.Flags().SortFlags = false
+	registerCmd.Flags().SortFlags = false
 
-	optionsCmd.Flags().String(
+	registerCmd.Flags().String(
 		"user-port",
 		"",
 		"SIP client port",
 	)
-	optionsCmd.Flags().String(
+
+	registerCmd.Flags().String(
 		"server-host",
 		"",
 		"SIP server host:port",
 	)
 
-	optionsCmd.Flags().String(
+	registerCmd.Flags().String(
 		"proxy",
 		"",
 		"SIP proxy",
 	)
 
-	optionsCmd.Flags().String(
+	registerCmd.Flags().String(
 		"from",
 		"",
 		"SIP From",
 	)
 
-	optionsCmd.Flags().String(
+	registerCmd.Flags().String(
 		"to",
 		"",
 		"SIP To",
 	)
 
-	optionsCmd.Flags().String(
+	registerCmd.Flags().String(
+		"realm",
+		"",
+		"realm",
+	)
+
+	registerCmd.Flags().String(
+		"username",
+		"",
+		"username",
+	)
+
+	registerCmd.Flags().String(
+		"password",
+		"",
+		"password",
+	)
+
+	registerCmd.Flags().Int(
+		"expires",
+		600,
+		"expires",
+	)
+
+	registerCmd.Flags().String(
 		"user-agent",
 		fmt.Sprintf(
 			"%s/%s(%s/%s)",
@@ -59,17 +84,24 @@ func init() {
 		"User-Agent",
 	)
 
-	if err := optionsCmd.MarkFlagRequired("server-host"); err != nil {
+	if err := registerCmd.MarkFlagRequired("server-host"); err != nil {
 		panic(err)
 	}
 
-	rootCmd.AddCommand(optionsCmd)
+	if err := registerCmd.MarkFlagRequired("username"); err != nil {
+		panic(err)
+	}
+	if err := registerCmd.MarkFlagRequired("password"); err != nil {
+		panic(err)
+	}
+
+	rootCmd.AddCommand(registerCmd)
 }
 
-var optionsCmd = &cobra.Command{
-	Use:   "options",
-	Short: "SIP OPTIONS",
-	Long:  "Make SIP OPTIONS",
+var registerCmd = &cobra.Command{
+	Use:   "register",
+	Short: "SIP REGISTER",
+	Long:  "Make SIP REGISTER",
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		userPort, err := cmd.Flags().GetString("user-port")
@@ -97,26 +129,41 @@ var optionsCmd = &cobra.Command{
 			return err
 		}
 
+		realm, err := cmd.Flags().GetString("realm")
+		if err != nil {
+			return err
+		}
+
+		username, err := cmd.Flags().GetString("username")
+		if err != nil {
+			return err
+		}
+
+		password, err := cmd.Flags().GetString("password")
+		if err != nil {
+			return err
+		}
+
+		expires, err := cmd.Flags().GetInt("expires")
+		if err != nil {
+			return err
+		}
+
 		userAgent, err := cmd.Flags().GetString("user-agent")
 		if err != nil {
 			return err
 		}
 
-		// cfg := config.SIPConfig{
-		// 	UserPort:   userPort,
-		// 	ServerHost: serverHost,
-		// 	Proxy:      proxy,
-		// 	From:       from,
-		// 	To:         to,
-		// 	UserAgent:  userAgent,
-		// }
-
-		req := domain.OptionsRequest{
+		req := domain.RegisterRequest{
 			UserPort:   userPort,
 			ServerHost: serverHost,
 			Proxy:      proxy,
 			From:       from,
 			To:         to,
+			Realm:      realm,
+			Username:   username,
+			Password:   password,
+			Expires:    expires,
 			UserAgent:  userAgent,
 		}
 
@@ -131,9 +178,8 @@ var optionsCmd = &cobra.Command{
 
 		sipClient, err := sip.NewClient(
 			log,
-			req.UserAgent,
+			userAgent,
 		)
-
 		if err != nil {
 			return err
 		}
@@ -142,6 +188,6 @@ var optionsCmd = &cobra.Command{
 			sipClient,
 		)
 
-		return application.Options(ctx, req)
+		return application.Register(ctx, req)
 	},
 }
