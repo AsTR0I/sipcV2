@@ -1,6 +1,7 @@
 package config
 
 type SIPConfig struct {
+	UserPort   string
 	ServerHost string
 	Proxy      string
 

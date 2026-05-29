@@ -19,6 +19,11 @@ func init() {
 	optionsCmd.Flags().SortFlags = false
 
 	optionsCmd.Flags().String(
+		"user-port",
+		"",
+		"SIP client port",
+	)
+	optionsCmd.Flags().String(
 		"server-host",
 		"",
 		"SIP server host:port",
@@ -43,30 +48,6 @@ func init() {
 	)
 
 	optionsCmd.Flags().String(
-		"username",
-		"",
-		"SIP username",
-	)
-
-	optionsCmd.Flags().String(
-		"password",
-		"",
-		"SIP password",
-	)
-
-	optionsCmd.Flags().String(
-		"realm",
-		"",
-		"SIP realm",
-	)
-
-	optionsCmd.Flags().Int(
-		"expire",
-		300,
-		"Expire seconds",
-	)
-
-	optionsCmd.Flags().String(
 		"user-agent",
 		fmt.Sprintf(
 			"%s/%s(%s/%s)",
@@ -82,14 +63,6 @@ func init() {
 		panic(err)
 	}
 
-	if err := optionsCmd.MarkFlagRequired("username"); err != nil {
-		panic(err)
-	}
-
-	if err := optionsCmd.MarkFlagRequired("realm"); err != nil {
-		panic(err)
-	}
-
 	rootCmd.AddCommand(optionsCmd)
 }
 
@@ -99,6 +72,10 @@ var optionsCmd = &cobra.Command{
 	Long:  "Performs SIP OPTIONS transaction",
 
 	RunE: func(cmd *cobra.Command, args []string) error {
+		userPort, err := cmd.Flags().GetString("user-port")
+		if err != nil {
+			return err
+		}
 
 		serverHost, err := cmd.Flags().GetString("server-host")
 		if err != nil {
@@ -120,40 +97,17 @@ var optionsCmd = &cobra.Command{
 			return err
 		}
 
-		username, err := cmd.Flags().GetString("username")
-		if err != nil {
-			return err
-		}
-
-		password, err := cmd.Flags().GetString("password")
-		if err != nil {
-			return err
-		}
-
-		realm, err := cmd.Flags().GetString("realm")
-		if err != nil {
-			return err
-		}
-
-		expire, err := cmd.Flags().GetInt("expire")
-		if err != nil {
-			return err
-		}
-
 		userAgent, err := cmd.Flags().GetString("user-agent")
 		if err != nil {
 			return err
 		}
 
 		cfg := config.SIPConfig{
+			UserPort:   userPort,
 			ServerHost: serverHost,
 			Proxy:      proxy,
 			From:       from,
 			To:         to,
-			Username:   username,
-			Password:   password,
-			Realm:      realm,
-			Expire:     expire,
 			UserAgent:  userAgent,
 		}
 
@@ -168,7 +122,7 @@ var optionsCmd = &cobra.Command{
 
 		sipClient, err := sip.NewClient(
 			log,
-			cfg.UserAgent,
+			cfg,
 		)
 		if err != nil {
 			return err
