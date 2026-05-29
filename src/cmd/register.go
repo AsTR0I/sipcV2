@@ -27,7 +27,7 @@ func init() {
 	registerCmd.Flags().String(
 		"server-host",
 		"",
-		"SIP server host:port",
+		"SIP server host[:port]",
 	)
 
 	registerCmd.Flags().String(
@@ -39,49 +39,49 @@ func init() {
 	registerCmd.Flags().String(
 		"from",
 		"",
-		"SIP From",
+		"SIP From header",
 	)
 
 	registerCmd.Flags().String(
 		"to",
 		"",
-		"SIP To",
+		"SIP To header",
 	)
 
 	registerCmd.Flags().String(
 		"realm",
 		"",
-		"realm",
+		"Auth realm",
 	)
 
 	registerCmd.Flags().String(
 		"username",
 		"",
-		"username",
+		"Auth username",
 	)
 
 	registerCmd.Flags().String(
 		"password",
 		"",
-		"password",
+		"Auth password",
 	)
 
 	registerCmd.Flags().Int(
 		"expires",
 		600,
-		"expires",
+		"SIP Expires header",
 	)
 
 	registerCmd.Flags().String(
 		"user-agent",
 		fmt.Sprintf(
-			"%s/%s(%s/%s)",
+			"%s(%s/%s)/v.%s",
 			rootCmd.Use,
 			rootCmd.Version,
 			runtime.GOOS,
 			runtime.GOARCH,
 		),
-		"User-Agent",
+		"SIP User-Agent header",
 	)
 
 	if err := registerCmd.MarkFlagRequired("server-host"); err != nil {

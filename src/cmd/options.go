@@ -26,7 +26,7 @@ func init() {
 	optionsCmd.Flags().String(
 		"server-host",
 		"",
-		"SIP server host:port",
+		"SIP server host[:port]",
 	)
 
 	optionsCmd.Flags().String(
@@ -38,25 +38,25 @@ func init() {
 	optionsCmd.Flags().String(
 		"from",
 		"",
-		"SIP From",
+		"SIP From header",
 	)
 
 	optionsCmd.Flags().String(
 		"to",
 		"",
-		"SIP To",
+		"SIP To header",
 	)
 
 	optionsCmd.Flags().String(
 		"user-agent",
 		fmt.Sprintf(
-			"%s/%s(%s/%s)",
+			"%s(%s/%s)/v.%s",
 			rootCmd.Use,
 			rootCmd.Version,
 			runtime.GOOS,
 			runtime.GOARCH,
 		),
-		"User-Agent",
+		"SIP User-Agent header",
 	)
 
 	if err := optionsCmd.MarkFlagRequired("server-host"); err != nil {
