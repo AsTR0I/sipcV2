@@ -7,72 +7,71 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/spf13/cobra"
-
 	"github.com/AsTR0I/sipcV2/internal/app"
 	"github.com/AsTR0I/sipcV2/internal/domain"
 	"github.com/AsTR0I/sipcV2/internal/logger"
 	"github.com/AsTR0I/sipcV2/internal/transport/sip"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	registerCmd.Flags().SortFlags = false
+	inviteCmd.Flags().SortFlags = false
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"user-port",
 		"",
 		"SIP client port",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"server-host",
 		"",
 		"SIP server host[:port]",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"proxy",
 		"",
 		"SIP proxy",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"from",
 		"",
 		"SIP From header",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"to",
 		"",
 		"SIP To header",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"realm",
 		"",
 		"Auth realm",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"username",
 		"",
 		"Auth username",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"password",
 		"",
 		"Auth password",
 	)
 
-	registerCmd.Flags().Int(
+	inviteCmd.Flags().Int(
 		"expires",
 		600,
 		"SIP Expires header",
 	)
 
-	registerCmd.Flags().String(
+	inviteCmd.Flags().String(
 		"user-agent",
 		fmt.Sprintf(
 			"%s(%s/%s)/v.%s",
@@ -84,24 +83,24 @@ func init() {
 		"SIP User-Agent header",
 	)
 
-	if err := registerCmd.MarkFlagRequired("server-host"); err != nil {
+	if err := inviteCmd.MarkFlagRequired("server-host"); err != nil {
 		panic(err)
 	}
 
-	if err := registerCmd.MarkFlagRequired("username"); err != nil {
+	if err := inviteCmd.MarkFlagRequired("username"); err != nil {
 		panic(err)
 	}
-	if err := registerCmd.MarkFlagRequired("password"); err != nil {
+	if err := inviteCmd.MarkFlagRequired("password"); err != nil {
 		panic(err)
 	}
 
-	rootCmd.AddCommand(registerCmd)
+	rootCmd.AddCommand(inviteCmd)
 }
 
-var registerCmd = &cobra.Command{
-	Use:   "register",
-	Short: "SIP REGISTER",
-	Long:  "Make SIP REGISTER",
+var inviteCmd = &cobra.Command{
+	Use:   "invite",
+	Short: "SIP INVITE",
+	Long:  "Make SIP INVITE",
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		userPort, err := cmd.Flags().GetString("user-port")
@@ -154,7 +153,7 @@ var registerCmd = &cobra.Command{
 			return err
 		}
 
-		req := domain.RegisterRequest{
+		req := domain.InviteRequest{
 			UserPort:   userPort,
 			ServerHost: serverHost,
 			Proxy:      proxy,
@@ -189,6 +188,10 @@ var registerCmd = &cobra.Command{
 			sipClient,
 		)
 
-		return application.Register(ctx, req)
+		err = application.Invite(ctx, req)
+
+		fmt.Println("invite returned", err)
+
+		return err
 	},
 }

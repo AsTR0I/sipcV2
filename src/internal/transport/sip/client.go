@@ -20,6 +20,7 @@ type Client struct {
 func NewClient(
 	log *slog.Logger,
 	userAgent string,
+	userPort string,
 ) (*Client, error) {
 
 	ua, err := sipgo.NewUA(
@@ -29,9 +30,16 @@ func NewClient(
 		return nil, err
 	}
 
+	port := "5060"
+	if userPort != "" {
+		port = userPort
+	}
+	localAddr := fmt.Sprintf("0.0.0.0:%s", port)
+
 	client, err := sipgo.NewClient(
 		ua,
 		sipgo.WithClientLogger(log),
+		sipgo.WithClientAddr(localAddr),
 	)
 	if err != nil {
 		return nil, err

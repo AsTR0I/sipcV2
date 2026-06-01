@@ -132,6 +132,7 @@ var optionsCmd = &cobra.Command{
 		sipClient, err := sip.NewClient(
 			log,
 			req.UserAgent,
+			userPort,
 		)
 
 		if err != nil {
